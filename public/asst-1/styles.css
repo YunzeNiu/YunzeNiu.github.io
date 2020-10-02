@@ -1,12 +1,13 @@
 .header {
- background-color: rgb(131, 108, 5);
- color: rgb(243, 172, 172);
+ background-color: rgb(171, 122, 12);
+ color: rgb(9, 50, 173);
  margin-bottom: 15px;
  padding: 15px;
  display: flex;
  flex-direction: row;
  flex-wrap: wrap;
  align-items: center;
+ font-family: 'Baloo Tammudu 2', cursive;
 }
 
 body {
@@ -24,17 +25,31 @@ body {
 }
 
 .container {
-    max-width: 950px;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
+
 }
+@media all and (max-width: 1000px) {
+    .container {
+        justify-content: center;
+    }
+}
+
+
 
 .picture_block {
     margin-right: 15px;
     flex: 0 1 auto;
 }
+
+@media all and (max-width: 1000px) {
+    .picture_block {
+        margin-right: 0px;
+        flex: 1 0 auto;
+    }
+} 
 
 img {
     border-radius: 4px;
@@ -43,5 +58,5 @@ img {
 }
 
 /* .second_block {
-    
+
 } */
