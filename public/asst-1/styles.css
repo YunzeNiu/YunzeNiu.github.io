@@ -41,8 +41,14 @@ body {
 .picture_block {
     margin-right: 15px;
     flex: 0 1 auto;
-    margin-right: 15px;
 }
+
+@media all and (max-width: 1000px) {
+    .picture_block {
+        margin-right: 0px;
+        flex: 1 0 auto;
+    }
+} 
 
 img {
     border-radius: 4px;
