@@ -24,12 +24,19 @@ body {
 }
 
 .container {
-    max-width: 950px;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
+
 }
+@media all and (max-width: 1000px) {
+    .container {
+        justify-content: center;
+    }
+}
+
+
 
 .picture_block {
     margin-right: 15px;
