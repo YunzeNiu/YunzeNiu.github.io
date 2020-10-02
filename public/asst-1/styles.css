@@ -9,9 +9,12 @@
  align-items: center;
 }
 
+body {
+    background-color: lightcyan;
+  }
+
 .wrapper,.container {
      display: flex;
-     background-color: rgb(220, 240, 245);
 }
 
 .wrapper{
@@ -27,12 +30,14 @@
 }
 
 .picture_block {
-    border-radius: 4px;
-    border-width: 1px;
-    border-style: solid;
     margin-right: 15px;
 }
 
-.second_block {
-    background-color: rgb(220, 240, 245);
+img {
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
 }
+
+/* .second_block {
+} */
