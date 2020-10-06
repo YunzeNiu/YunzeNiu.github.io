@@ -1,3 +1,8 @@
+function hasDuplicates(array) {
+  console.log(new Set(array));
+  return (new Set(array)).size !== array.length;
+}
+
 describe('Lab 5', () => {
   let initialBG;
   const initialCheckboxVals = [];
@@ -209,14 +214,17 @@ describe('Lab 5', () => {
     });
   });
   context('Lab 5 Goals 2', () => {
+    it('Has a script tag', () => {
+      cy.get('script')
+        .should('have.length.greaterThan', 0);
+    });
+
     it('Clicking the Activate button changes the background color', () => {
       cy.get('button')
         .contains('Activate')
         .click()
         .then(() => {
           cy.get('body').then(($bdy) => {
-            console.log($bdy);
-            console.log($bdy.css('background-color'));
             expect($bdy.css('background-color')).to.not.equal(initialBG);
           });
         });
@@ -233,6 +241,8 @@ describe('Lab 5', () => {
       cy.fixture('test_values').then((json) => {
         cy.get('h1')
           .contains(json.name);
+        cy.get('h1')
+          .contains('Lab 5 for');
       });
     });
 
@@ -249,6 +259,15 @@ describe('Lab 5', () => {
       cy.get('.flex-inner label')
         .each(($el) => {
           expect(initialCheckboxVals.includes($el.text())).to.be.false;
+        });
+
+      // each label is different than the other
+      cy.get('.flex-inner label')
+        .then(($el) => {
+          const arr = Array.from($el);
+          const test = arr.map((m) => m.innerText);
+          const testDupes = hasDuplicates(test);
+          expect(hasDuplicates(test)).to.be.false;
         });
     });
 
