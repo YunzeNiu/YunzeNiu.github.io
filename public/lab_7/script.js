@@ -1,19 +1,34 @@
 function convertRestaurantsToCategories(restaurantList) {
-  // process your restaurants here!
+  const list = restaurantList.reduce((collection, item, i) => {
+    const existCategory = collection.find((findItem) => findItem.label === item.category);
+    if (!existCategory) {
+      collection.push({
+        label: item.category,
+        y: 1
+      });
+    } else {
+      const position = collection.findIndex(el => el.label === item.category);
+      collection[position].y += 1;
+    }
+    return collection;
+  }, []);
   return list;
-}
+};
 
 function makeYourOptionsObject(datapointsFromRestaurantsList) {
-  // set your chart configuration here!
   CanvasJS.addColorSet('customColorSet1', [
-    // add an array of colors here https://canvasjs.com/docs/charts/chart-options/colorset/
+    '#FC6600',
+    '#F9A602',
+    '#F9812A',
+    '#FD6A02',
+    '#8B4000'
   ]);
 
   return {
     animationEnabled: true,
     colorSet: 'customColorSet1',
     title: {
-      text: 'Change This Title'
+      text: 'Places To Eat Out In Future'
     },
     axisX: {
       interval: 1,
@@ -22,9 +37,27 @@ function makeYourOptionsObject(datapointsFromRestaurantsList) {
     axisY2: {
       interlacedColor: 'rgba(1,77,101,.2)',
       gridColor: 'rgba(1,77,101,.1)',
-      title: 'Change This Title',
+      title: 'Restaurants By Category',
       labelFontSize: 12,
-      scaleBreaks: {customBreaks: []} // Add your scale breaks here https://canvasjs.com/docs/charts/chart-options/axisy/scale-breaks/custom-breaks/
+      scaleBreaks: {customBreaks: [{
+        startValue: 40,
+        endValue: 50,
+        color: "blue",
+	      type: "zigzag"
+      },
+      {
+        startValue: 85,
+        endValue: 100,
+        color: "blue",
+	      type: "zigzag"
+      },
+      {
+        startValue: 140,
+        endValue: 175,
+        color: "blue",
+	      type: "zigzag"
+      }
+    ]}
     },
     data: [{
       type: 'bar',
@@ -63,4 +96,4 @@ document.body.addEventListener('submit', async (e) => {
     .catch((err) => {
       console.log(err);
     });
-});
+  });
