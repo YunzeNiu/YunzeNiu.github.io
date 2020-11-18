@@ -13,7 +13,7 @@ function convertRestaurantsToCategories(restaurantList) {
     return collection;
   }, []);
   return list;
-};
+}
 
 function makeYourOptionsObject(datapointsFromRestaurantsList) {
   CanvasJS.addColorSet('customColorSet1', [
@@ -43,7 +43,7 @@ function makeYourOptionsObject(datapointsFromRestaurantsList) {
         startValue: 40,
         endValue: 50,
         color: "blue",
-	      type: "zigzag"
+        type: "zigzag"
       },
       {
         startValue: 85,
@@ -96,4 +96,4 @@ document.body.addEventListener('submit', async (e) => {
     .catch((err) => {
       console.log(err);
     });
-  });
+});
