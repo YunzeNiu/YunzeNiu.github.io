@@ -1,0 +1,46 @@
+body {
+  background-color: indigo;
+}
+
+h1 {
+  display: block;
+  color: #eee;
+  padding: 12px;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.textentry {
+  width: 100%;
+}
+
+span.name {
+  font-weight: 900;
+  font-size: 16px;
+}
+
+#navcontainer {
+  padding: 0 0 1em 0;
+  color: #333;
+}
+
+#navcontainer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  width: auto;
+}
+
+#navcontainer li {
+  border-bottom: 1px solid #90bade;
+  margin: 0;
+  padding: 10px;
+  border-radius: 3px;
+  background: rgb(238, 232, 170);
+  background: linear-gradient(
+    180deg,
+    rgba(238, 232, 170, 1) 35%,
+    rgba(255, 251, 238, 1) 100%
+  );
+}

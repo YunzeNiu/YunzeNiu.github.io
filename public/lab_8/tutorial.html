@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>tutorial</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<div id="Tutorial"><h1 id="Tutorial" class="header"><a href="#Tutorial">Tutorial</a></h1></div>
+
+<div id="Contents" class="toc"><h1 id="Contents">Contents</a></h1></div>
+<ul>
+<li>
+<a href="tutorial.html#Tutorial">Tutorial</a>
+
+<ul>
+<li>
+<a href="tutorial.html#Tutorial-Part 1: Tips">Part 1: Tips</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 2: Installation and Setup">Part 2: Installation and Setup</a>
+
+<ul>
+<li>
+<a href="tutorial.html#Tutorial-Part 2: Installation and Setup-Dependencies">Dependencies</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 2: Installation and Setup-Setup">Setup</a>
+
+</ul>
+<li>
+<a href="tutorial.html#Tutorial-Part 3: Configuration">Part 3: Configuration</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 4: Starting the database server">Part 4: Starting the database server</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 5: Creating tables and columns">Part 5: Creating tables and columns</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 6: Fetching data from an external API">Part 6: Fetching data from an external API</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 7: Moving data to the database">Part 7: Moving data to the database</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 8: Quering data">Part 8: Quering data</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 9: Using data from the database on the front end (of Lab 7)">Part 9: Using data from the database on the front end (of Lab 7)</a>
+
+<li>
+<a href="tutorial.html#Tutorial-Part 10: Tips and tricks">Part 10: Tips and tricks</a>
+
+</ul>
+</ul>
+
+<div id="Tutorial-Part 1: Tips"><h2 id="Part 1: Tips" class="header"><a href="#Tutorial-Part 1: Tips">Part 1: Tips</a></h2></div>
+
+<p>
+The new version of the classroom repository has several tools to assist with the lab: a new script called <code>sql-clear</code> which will delete the database and the tmp directory and then recreating the tmp directory. This will keep sqlite from having duplicate data and from running into errors. Ideally, you will only need to run this once (in a production setting) just to create the tmp/ directory, but feel free to run this as many times as needed if you want to reset your lab database.
+By default, this will run every time <code>npm start</code> is invoked.
+</p>
+
+<p>
+If you don't have <code>sql-clear</code> in your "package.json", you can write it like this:
+</p>
+
+<pre json>
+  "scripts": {
+    "test": "node --experimental-modules lab_utils/html_validation_error_gen.js",
+    "test2": "node --experimental-modules lab_utils/html_validation_error_gen.js &amp;&amp; npx cypress open",
+    "sql-clear": "rm -rf tmp &amp;&amp; mkdir tmp",
+    "start": "nodemon server.js"
+  },
+
+</pre>
+
+<p>
+Another tip is to write all your sql setup code before your enpoints are written. Your database should be set up and full of data before you run any queries on it.
+</p>
+
+<p>
+Feel free to write your SQL functions in a seperate .js file (maybe database.js) and import the functions in your sever.js file or run them in a seperate script that you can write in your package.json file (if you are comfortable doing so). This is a better approach to writing a complex web app and allows you to isolate errors from the rest of your code, like not breaking your '/api' endpoint because of a syntax error in your sql setup. This is entirely optional though, it will add additional complexity to your application.
+</p>
+
+<div id="Tutorial-Part 2: Installation and Setup"><h2 id="Part 2: Installation and Setup" class="header"><a href="#Tutorial-Part 2: Installation and Setup">Part 2: Installation and Setup</a></h2></div>
+
+<p>
+Installation is pretty straightforward. Simply install the dependencies, then create the first function
+</p>
+
+<div id="Tutorial-Part 2: Installation and Setup-Dependencies"><h3 id="Dependencies" class="header"><a href="#Tutorial-Part 2: Installation and Setup-Dependencies">Dependencies</a></h3></div>
+
+<p>
+Install sqlite and sqlite3 using npm:
+</p>
+<pre bash>
+npm install sqlite sqlite3 --save
+</pre>
+
+
+<p>
+<code>sqlite3</code> is a library which contains the actual bindings to a SQLite3 database. <code>sqlite</code> is a wrapper around this library which makes it much easier to use.
+</p>
+
+<div id="Tutorial-Part 2: Installation and Setup-Setup"><h3 id="Setup" class="header"><a href="#Tutorial-Part 2: Installation and Setup-Setup">Setup</a></h3></div>
+
+<p>
+Import both dependencies into the server.js file:
+</p>
+<pre javascript>
+import { open } from 'sqlite';
+import sqlite3 from 'sqlite3';
+</pre>
+<p>
+Before starting on the configuration, make sure to run <code>npm sql-clear</code> to make sure that the <code>tmp/</code> directory has been created.
+</p>
+
+
+<div id="Tutorial-Part 3: Configuration"><h2 id="Part 3: Configuration" class="header"><a href="#Tutorial-Part 3: Configuration">Part 3: Configuration</a></h2></div>
+
+<p>
+Configuration of the Database is actually very straightforward. All you need to do is create a variable called dbSettings in the 'server.js' file and place the filename that the server will be using as well as the driver, which in this case is <code>sqlite3.Database</code>.
+</p>
+
+<pre javascript>
+const dbSettings = {
+	filename: './tmp/database.db',
+	driver: sqlite3.Database
+	};
+</pre>
+
+
+<div id="Tutorial-Part 4: Starting the database server"><h2 id="Part 4: Starting the database server" class="header"><a href="#Tutorial-Part 4: Starting the database server">Part 4: Starting the database server</a></h2></div>
+<p>
+Starting the database is a multi-step process. It's good practice to put all these steps in a function (or several if it is a complex database). We're going to create a function called <code>databaseInitialize</code>. Since we don't want to continue doing anything database related until the database is finished loading and also generating the database can be prone to errors (it's very complex, and more complexity means more failure), we are going to create it as an asynchronous function and also use a "Try/Except" block to handle any errors that may occur during database initialization.
+</p>
+
+<pre javascript>
+async function databaseInitialize(dbSettings) {
+	try {
+		const db = await open(dbSettings);
+		console.log("Success");
+
+	}
+	catch(e) {
+		console.log("Error loading Database");
+
+	}
+}
+
+</pre>
+
+<p>
+This function will be the main function we wil be writing in. We can fetch data from a url, create tables, and load data from the url into the tables all from within this function. It is sometimes better to seperate some utilities into other functions but we will keep it all in the same function for now. You can call this function anywhere within server.js, though it's better to run it before the endpoints are initialized.
+</p>
+
+<div id="Tutorial-Part 5: Creating tables and columns"><h2 id="Part 5: Creating tables and columns" class="header"><a href="#Tutorial-Part 5: Creating tables and columns">Part 5: Creating tables and columns</a></h2></div>
+
+<p>
+Database design is a very important aspect of creating a well functioning web app. Unfortunately, databases are hard to optimize, especially when you only have a week to complete this assignment. To not worry about this, the database will only have one table. Also since the only parts of the data that we will need are the restaurant names, and the category, we can make the table really simple.
+</p>
+
+<p>
+The following will be the basic structure of how the table is going to look. In programming (and most things in life) the simpler things are, the less things will break.
+</p>
+
+
+<table>
+<tr>
+<th>
+ID
+</th>
+<th>
+restaurant name
+</th>
+<th>
+category
+</th>
+</tr>
+<tr>
+<td>
+1
+</td>
+<td>
+China House
+</td>
+<td>
+Rats
+</td>
+</tr>
+<tr>
+<td>
+2
+</td>
+<td>
+McDonalds
+</td>
+<td>
+old oil
+</td>
+</tr>
+<tr>
+<td>
+*
+</td>
+<td>
+**
+</td>
+<td>
+**
+</td>
+</tr>
+</table>
+
+<p>
+Actually creating this table in the SQL database is surprisingly straightforward if you are familiar with the SQL language.
+</p>
+
+<pre sql>
+
+CREATE TABLE IF NOT EXISTS restaurants (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	restaurant_name TEXT,
+	category TEXT
+	)
+
+</pre>
+
+<p>
+The variables id, restaurant_name, and category are all column names. We set id as the primary key (and it autoincrements), and have both the restaurant_name and the category as a text data type.
+</p>
+
+<p>
+The way we can send this command to the sqlite database is by using the <code>exec()</code> function that is a part of the sqlite library.
+</p>
+
+<pre javascript>
+async function databaseInitialize(dbSettings) {
+	try {
+		const db = await open(dbSettings);
+		await db.exec(`CREATE TABLE IF NOT EXISTS restaurants (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			restaurant_name TEXT,
+			category TEXT)
+			`)
+		console.log("Success");
+
+	}
+	catch(e) {
+		console.log("Error loading Database");
+
+	}
+}
+
+</pre>
+
+<p>
+Notice how the <code>exec</code> command comes after the <code>db.open()</code> command and is also set so the next step has to await the completion of this command.
+After this runs, you may want to check how the database looks. You can do this by writing a query with <code>db.get().</code> <code>get()</code> will return a single row. <code>all()</code> will return all rows as an array. Each of these functions returns a JavaScript object.
+</p>
+<pre sql>
+ SELECT *
+ FROM restaurants
+</pre>
+
+<p>
+ You can print the results of this query to the console like this:
+</p>
+
+<pre javascript>
+
+async function databaseInitialize(dbSettings) {
+	try {
+		const db = await open(dbSettings);
+		await db.exec("CREATE TABLE IF NOT EXISTS restaurants (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			restaurant_name TEXT,
+			category TEXT)
+			")
+		const test = await db.get("SELECT * FROM restaurants")
+		console.log(test);
+
+	}
+	catch(e) {
+		console.log("Error loading Database");
+
+	}
+}
+</pre>
+
+<p>
+If everything is working thus far, it should return the table name and some empty rows.
+</p>
+
+<div id="Tutorial-Part 6: Fetching data from an external API"><h2 id="Part 6: Fetching data from an external API" class="header"><a href="#Tutorial-Part 6: Fetching data from an external API">Part 6: Fetching data from an external API</a></h2></div>
+
+<p>
+You've done this before in Lab 7, so I will just show a snippet of how the code should look. The main difference from lab 7 is that the fetch request will occur outside of the endpoint.
+It will be easier to write this in a seperate, asynchronous function so that we don't have too much code in the databaseInitialize function.
+</p>
+
+<pre javascript>
+async function dataFetch() {
+	const url = "https://data.princegeorgescountymd.gov/resource/umjn-t2iz.json";
+	const response = await fetch(url);
+
+	return response.json()
+
+}
+
+</pre>
+
+<p>
+Then we can call this function from within the databaseInitialize function:
+</p>
+<pre javascript>
+
+async function databaseInitialize(dbSettings) {
+	try {
+		const db = await open(dbSettings);
+		await db.exec(`CREATE TABLE IF NOT EXISTS restaurants (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			restaurant_name TEXT,
+			category TEXT)
+			`)
+
+		const data = await dataFetch();
+
+		const test = await db.get("SELECT * FROM restaurants")
+		console.log(test);
+
+	}
+	catch(e) {
+		console.log("Error loading Database");
+		console.log(e);
+
+	}
+}
+
+</pre>
+
+<p>
+You can optionally call a <code>console.log()</code> to see if the data has been loaded properly.
+</p>
+
+<div id="Tutorial-Part 7: Moving data to the database"><h2 id="Part 7: Moving data to the database" class="header"><a href="#Tutorial-Part 7: Moving data to the database">Part 7: Moving data to the database</a></h2></div>
+
+<p>
+This is finally where we get to place the data into the database! This is actually very straightforward if you are familiar with SQL commands.
+The way I would do this is to create a <code>for</code> loop to iterate over each entry in the JSON object and within that loop create some variables to collect each item that we need. After this, we can use <em>string interpolation</em> to place these variables inside a SQL query.
+</p>
+
+<pre javascript>
+data.forEach((entry) =&gt; {
+		const restaurant_name = entry.name;
+		const category = entry.category;
+
+		await db.exec(`INSERT INTO restaurants (restaurant_name, category) VALUES ("${restaurant_name}", "${category}")`);
+		}
+		)
+
+</pre>
+
+<p>
+A better way to do this is to create an inserting function. This is really useful if you want to reuse this code insert queries later using forms or something. We will also write a "try-catch" block to make debugging easier.
+</p>
+
+<pre javascript>
+
+async function insertIntoDB(data) {
+	try {
+		const restaurant_name = data.name;
+		const category = data.category;
+
+		await db.exec(`INSERT INTO restaurants (restaurant_name, category) VALUES ("${restaurant_name}", "${category}")`);
+		console.log(`${restaurant_name} and ${category} inserted`);
+		}
+
+	catch(e) {
+		console.log('Error on insertion');
+		console.log(e);
+		}
+
+}
+</pre>
+
+<pre javascript>
+async function databaseInitialize(dbSettings) {
+	try {
+		const db = await open(dbSettings);
+		await db.exec(`CREATE TABLE IF NOT EXISTS restaurants (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			restaurant_name TEXT,
+			category TEXT)
+			`)
+
+		const data = await dataFetch();
+		data.forEach((entry) =&gt; { insertIntoDB(entry) });
+
+
+		const test = await db.get("SELECT * FROM restaurants")
+		console.log(test);
+
+	}
+	catch(e) {
+		console.log("Error loading Database");
+		console.log(e);
+
+	}
+}
+</pre>
+
+<p>
+Once this function runs, you should be able to see all the data from the Test result.
+</p>
+
+<p>
+This might seem very complicated and a lot of writing code for a very simple database. <span id="Tutorial-Part 7: Moving data to the database-It is"></span><strong id="It is">It is</strong>. Unfortunately JavaScript is pretty challenging to debug, so its better to create lots of places that can check for errors and make debugging a lot easier. I spent a little too many sleepless nights trying to figure out errors that would have been avoided if I wrote code like this. Also, if you ever wanted make your database much bigger, writing code like this makes it so much easier to scale. Write once, cry once.
+</p>
+
+<div id="Tutorial-Part 8: Quering data"><h2 id="Part 8: Quering data" class="header"><a href="#Tutorial-Part 8: Quering data">Part 8: Quering data</a></h2></div>
+
+<p>
+This is where the ease of use of SQL comes into play. In lab 7, you had make a <code>for</code> loop and do some math to get all the categories aggregated. No more with SQLite.
+</p>
+
+<pre sql>
+SELECT category, COUNT(restaurant_name) FROM restaurants GROUP BY category;
+</pre>
+
+<p>
+Thats it. That line should return an object that you can easily convert to a JSON object.
+</p>
+
+<p>
+We can create a function to call this at will:
+</p>
+<pre javascript>
+async function query(db) {
+  const result = await db.all(`SELECT category, COUNT(restaurant_name) FROM restaurants GROUP BY category`);
+  return result;
+}
+
+</pre>
+
+<p>
+This function will be called within the '/sql' endpoint for the post request (much the same as the previous lab). But now we run into the problem of needing to define a db each time we use this function in server.js. This can be avoided by running <code>const db = open.dbSettings</code> before any of the functions in server.js are defined, but you can also simply call the <code>open</code> function from within the endpoint to make it easier.
+</p>
+
+<div id="Tutorial-Part 9: Using data from the database on the front end (of Lab 7)"><h2 id="Part 9: Using data from the database on the front end (of Lab 7)" class="header"><a href="#Tutorial-Part 9: Using data from the database on the front end (of Lab 7)">Part 9: Using data from the database on the front end (of Lab 7)</a></h2></div>
+
+<p>
+You should have an endpoint that looks like this:
+</p>
+<pre javascript>
+
+app.route('/sql')
+  .get((req, res) =&gt; {
+    console.log('GET detected');
+  })
+  .post(async (req, res) =&gt; {
+    console.log('POST request detected');
+    console.log('Form data in res.body', req.body);
+    // This is where the SQL retrieval function will be:
+    // Please remove the below variable
+    const output = '';
+    // This output must be converted to SQL
+    res.json(output);
+  });
+
+</pre>
+
+<p>
+Our goal is to change 'output' to be the result of the query function we wrote earlier:
+</p>
+
+<pre javascript>
+
+app.route('/sql')
+  .get((req, res) =&gt; {
+    console.log('GET detected');
+  })
+  .post(async (req, res) =&gt; {
+    console.log('POST request detected');
+    console.log('Form data in res.body', req.body);
+    // This is where the SQL retrieval function will be:
+    // Please remove the below variable
+		const db = await open(dbSettings);
+    const output = await query(db);
+    // This output must be converted to SQL
+    res.json(output);
+  });
+
+</pre>
+
+<p>
+Thats it. The data should be in the same format as the data that you retrieved from Lab 7.
+</p>
+
+<p>
+Just copy over your Lab 7 public code to lab 8 and you should be able to delete the convertRestaurantsToCategories function and use the preprocessed data from the '/sql' endpoint instead. You all did your lab 7's in different ways, so I can't give a one size fits all code for that.
+</p>
+
+<div id="Tutorial-Part 10: Tips and tricks"><h2 id="Part 10: Tips and tricks" class="header"><a href="#Tutorial-Part 10: Tips and tricks">Part 10: Tips and tricks</a></h2></div>
+
+<p>
+Here are some tips for this lab:
+</p>
+<ul>
+<li>
+Write all of the above code (minus the endpoint, and optionally the query function) outside of the server.js file. This way you can create the database directly from npm and not have to recreate it every time npm start is run. This way you only need to build the database once and then write queries to it. This will help you tremendously if you decide to use this for your final project.
+
+<li>
+I usually write each function in a diretory and export the functions in case I need to use the code elsewhere in the web application. I recommend doing this for big projects.
+
+<li>
+Try to create checks for the data so that bad entries and data don't end up polluting your database.
+
+</ul>
+
+</body>
+</html>
