@@ -58,6 +58,7 @@ document.body.addEventListener('submit', async (e) => {
         $(li).append(`<label for = ${el.code}>${el.name}</label>`);
         $(ul).append(li);
       });
+    })
     .catch((err) => {
       console.log(err)
       // set fave to no
