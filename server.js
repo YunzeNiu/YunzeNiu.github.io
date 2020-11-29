@@ -48,12 +48,11 @@ const dbSettings = {
   driver: sqlite3.Database,
 };
 
+
 async function dataFetch() {
 	const url = "https://data.princegeorgescountymd.gov/resource/umjn-t2iz.json";
 	const response = await fetch(url);
-
 	return response.json()
-
 }
 
 async function insertIntoDB(data) {
@@ -107,7 +106,7 @@ app.route('/sql')
   .post(async (req, res) => {
     console.log('POST request detected');
     console.log('Form data in res.body', req.body);
-    const db = databaseInitialize(dbSettings);
+    const db = await databaseInitialize(dbSettings);
     const output = await query(db);
     // This output must be converted to SQL
     res.json(output);
