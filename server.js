@@ -96,6 +96,8 @@ async function databaseInitialize(dbSettings) {
 	}
 }
 
+databaseInitialize();
+
 async function query(db) {
   const result = await db.all(`SELECT category, COUNT(restaurant_name) FROM restaurants GROUP BY category`);
   return result;
@@ -108,9 +110,7 @@ app.route('/sql')
   .post(async (req, res) => {
     console.log('POST request detected');
     console.log('Form data in res.body', req.body);
-    // This is where the SQL retrieval function will be:
-    // Please remove the below variable
-		const db = await open(dbSettings);
+    const db = await open(dbSettings);
     const output = await query(db);
     // This output must be converted to SQL
     res.json(output);
