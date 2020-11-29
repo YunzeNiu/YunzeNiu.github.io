@@ -48,14 +48,13 @@ const dbSettings = {
   driver: sqlite3.Database,
 };
 
-
-async function dataFetch() {
-	const url = "https://data.princegeorgescountymd.gov/resource/umjn-t2iz.json";
-	const response = await fetch(url);
-	return response.json()
+async function foodDataFetcher() {
+  const url = 'https://data.princegeorgescountymd.gov/resource/umjn-t2iz.json';
+  const response = await fetch(url);
+  return response.json()
 }
 
-async function insertIntoDB(data) {
+async function dataInput(data) {
 	try {
 		const restaurant_name = data.name;
 		const category = data.category;
@@ -71,24 +70,30 @@ async function insertIntoDB(data) {
 
 }
 
-async function query(db) {
-  const result = await db.all(`SELECT category, COUNT(restaurant_name) FROM restaurants GROUP BY category`);
+async function databaseRetriever(db) {
+  const result = await db.all(`SELECT category, COUNT(name) FROM food GROUP BY category`);
   return result;
 }
 
 async function databaseInitialize(dbSettings) {
   try {
     const db = await open(dbSettings);
-    await db.exec(`CREATE TABLE IF NOT EXISTS restaurants (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      restaurant_name TEXT,
-      category TEXT)
+    await db.exec(`CREATE TABLE IF NOT EXISTS food (
+      name TEXT PRIMARY KEY AUTOINCREMENT,
+      category TEXT,
+      inspection_date DATE,
+      inspection_results TEXT,
+      city TEXT,
+      state TEXT,
+      zip INTEGER,
+      owner TEXT,
+      type TEXT)
       `)
 
-    const data = await dataFetch();
-    data.forEach((entry) => { insertIntoDB(entry) });
+    const data = await foodDataFetcher();
+    data.forEach((entry) => { dataInput(entry) });
 
-    const test = await db.get("SELECT * FROM restaurants")
+    const test = await db.get("SELECT * FROM food")
     console.log(test);
 
   }
@@ -99,6 +104,8 @@ async function databaseInitialize(dbSettings) {
   }
 }
 
+const db = databaseInitialize(dbSettings);
+
 app.route('/sql')
   .get((req, res) => {
     console.log('GET detected');
@@ -106,8 +113,7 @@ app.route('/sql')
   .post(async (req, res) => {
     console.log('POST request detected');
     console.log('Form data in res.body', req.body);
-    const db = await databaseInitialize(dbSettings);
-    const output = await query(db);
+    const output = await databaseRetriever(db);
     // This output must be converted to SQL
     res.json(output);
   });
