@@ -55,19 +55,18 @@ async function foodDataFetcher() {
 }
 
 async function dataInput(data) {
-	try {
-		const restaurant_name = data.name;
-		const category = data.category;
+  try {
+    const restaurant_name = data.name;
+    const category = data.category;
 
-		await db.exec(`INSERT INTO restaurants (restaurant_name, category) VALUES ("${restaurant_name}", "${category}")`);
-		console.log(`${restaurant_name} and ${category} inserted`);
-		}
+    await db.exec(`INSERT INTO restaurants (restaurant_name, category) VALUES ("${restaurant_name}", "${category}")`);
+    console.log(`${restaurant_name} and ${category} inserted`);
+}
 
-	catch(e) {
-		console.log('Error on insertion');
-		console.log(e);
-		}
-
+  catch(e) {
+    console.log('Error on insertion');
+    console.log(e);
+  }
 }
 
 async function databaseRetriever(db) {
@@ -95,16 +94,14 @@ async function databaseInitialize(dbSettings) {
 
     const test = await db.get("SELECT * FROM food")
     console.log(test);
-
   }
-  catch(e) {
+  catch (e) {
     console.log("Error loading Database");
     console.log(e);
-
   }
 }
 
-const db = databaseInitialize(dbSettings);
+databaseInitialize();
 
 app.route('/sql')
   .get((req, res) => {
@@ -113,7 +110,5 @@ app.route('/sql')
   .post(async (req, res) => {
     console.log('POST request detected');
     console.log('Form data in res.body', req.body);
-    const output = await databaseRetriever(db);
-    // This output must be converted to SQL
-    res.json(output);
+    res.json(databaseRetriever(db));
   });
