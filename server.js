@@ -100,6 +100,7 @@ app.route('/sql')
   .post(async (req, res) => {
     console.log('POST request detected');
     console.log('Form data in res.body', req.body);
-    const output = '';
+    const db = await open(dbSettings);
+    const output = await query(db);
     res.json(output);
   });
