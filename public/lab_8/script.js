@@ -1,20 +1,3 @@
-function convertRestaurantsToCategories(restaurantList) {
-  const list = restaurantList.reduce((collection, item, i) => {
-    const existCategory = collection.find((findItem) => findItem.label === item.category);
-    if (!existCategory) {
-      collection.push({
-        label: item.category,
-        y: 1
-      });
-    } else {
-      const position = collection.findIndex(el => el.label === item.category);
-      collection[position].y += 1;
-    }
-    return collection;
-  }, []);
-  return list;
-}
-
 function makeYourOptionsObject(datapointsFromRestaurantsList) {
   CanvasJS.addColorSet('customColorSet1', [
     '#FC6600',
@@ -49,15 +32,15 @@ function makeYourOptionsObject(datapointsFromRestaurantsList) {
         startValue: 85,
         endValue: 100,
         color: "blue",
-	      type: "zigzag"
+        type: "zigzag"
       },
       {
         startValue: 140,
         endValue: 175,
         color: "blue",
-	      type: "zigzag"
+        type: "zigzag"
+      }]
       }
-    ]}
     },
     data: [{
       type: 'bar',
@@ -74,7 +57,7 @@ function runThisWithResultsFromServer(jsonFromServer) {
   // Process your restaurants list
   // Make a configuration object for your chart
   // Instantiate your chart
-  const reorganizedData = convertRestaurantsToCategories(jsonFromServer);
+  const reorganizedData = jsonFromServer;
   const options = makeYourOptionsObject(reorganizedData);
   const chart = new CanvasJS.Chart('chartContainer', options);
   chart.render();

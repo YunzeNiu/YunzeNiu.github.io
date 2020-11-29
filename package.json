@@ -7,6 +7,7 @@
   "scripts": {
     "test": "node --experimental-modules lab_utils/html_validation_error_gen.js",
     "test2": "node --experimental-modules lab_utils/html_validation_error_gen.js && npx cypress open",
+    "sql-clear": "rm -rf tmp && mkdir tmp",
     "start": "nodemon server.js"
   },
   "engines": {
@@ -20,9 +21,10 @@
     "express": "^4.17.1",
     "node-fetch": "^2.6.1",
     "nodemon": "^2.0.4",
-
     "prismjs": "^1.22.0",
-    "recursive-readdir": "^2.2.2"
+    "recursive-readdir": "^2.2.2",
+    "sqlite": "^4.0.17",
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {
     "cypress": "^5.3.0",
