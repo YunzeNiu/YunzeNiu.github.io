@@ -44,9 +44,9 @@ app.listen(port, () => {
 });
 
 const dbSettings = {
-	filename: './tmp/database.db',
-	driver: sqlite3.Database
-	};
+  filename: './tmp/database.db',
+  driver: sqlite3.Database,
+};
 
 async function dataFetch() {
 	const url = "https://data.princegeorgescountymd.gov/resource/umjn-t2iz.json";
@@ -72,35 +72,32 @@ async function insertIntoDB(data) {
 
 }
 
-async function databaseInitialize(dbSettings) {
-	try {
-		const db = await open(dbSettings);
-		await db.exec(`CREATE TABLE IF NOT EXISTS restaurants (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			restaurant_name TEXT,
-			category TEXT)
-			`)
-
-		const data = await dataFetch();
-		data.forEach((entry) => { insertIntoDB(entry) });
-
-
-		const test = await db.get("SELECT * FROM restaurants")
-		console.log(test);
-
-	}
-	catch(e) {
-		console.log("Error loading Database");
-		console.log(e);
-
-	}
-}
-
-databaseInitialize();
-
 async function query(db) {
   const result = await db.all(`SELECT category, COUNT(restaurant_name) FROM restaurants GROUP BY category`);
   return result;
+}
+
+async function databaseInitialize(dbSettings) {
+  try {
+    const db = await open(dbSettings);
+    await db.exec(`CREATE TABLE IF NOT EXISTS restaurants (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      restaurant_name TEXT,
+      category TEXT)
+      `)
+
+    const data = await dataFetch();
+    data.forEach((entry) => { insertIntoDB(entry) });
+
+    const test = await db.get("SELECT * FROM restaurants")
+    console.log(test);
+
+  }
+  catch(e) {
+    console.log("Error loading Database");
+    console.log(e);
+
+  }
 }
 
 app.route('/sql')
@@ -110,7 +107,7 @@ app.route('/sql')
   .post(async (req, res) => {
     console.log('POST request detected');
     console.log('Form data in res.body', req.body);
-    const db = await open(dbSettings);
+    const db = databaseInitialize(dbSettings);
     const output = await query(db);
     // This output must be converted to SQL
     res.json(output);
